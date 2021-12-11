@@ -1,0 +1,67 @@
+* ***REMOVED*** box-sizing: border-box; ***REMOVED***
+
+body ***REMOVED*** font-family: sans-serif; ***REMOVED***
+
+.scene ***REMOVED***
+  width: 200px;
+  height: 200px;
+  margin: 80px;
+  perspective: 400px;
+  text-align: center;
+***REMOVED***
+
+.cube ***REMOVED***
+  width: 200px;
+  height: 200px;
+  position: relative;
+  transform-style: preserve-3d;
+  transform: translateZ(-100px);
+  transition: transform 1s;
+***REMOVED***
+
+.cube.show-front  ***REMOVED*** transform: translateZ(-100px) rotateY(   0deg); ***REMOVED***
+.cube.show-right  ***REMOVED*** transform: translateZ(-100px) rotateY( -90deg); ***REMOVED***
+.cube.show-back   ***REMOVED*** transform: translateZ(-100px) rotateY(-180deg); ***REMOVED***
+.cube.show-left   ***REMOVED*** transform: translateZ(-100px) rotateY(  90deg); ***REMOVED***
+.cube.show-top    ***REMOVED*** transform: translateZ(-100px) rotateX( -90deg); ***REMOVED***
+.cube.show-bottom ***REMOVED*** transform: translateZ(-100px) rotateX(  90deg); ***REMOVED***
+
+.cube__face ***REMOVED***
+  position: absolute;
+  width: 200px;
+  height: 200px;
+  border: 2px solid black;
+  padding-top: 0px;
+  font-size: 40px;
+  font-weight: bold;
+  color: white;
+  text-align: center;
+***REMOVED***
+
+.cube__face--front  ***REMOVED*** background: hsla(  0, 100%, 50%, 0.4); ***REMOVED***
+.cube__face--right  ***REMOVED*** background: hsla( 60, 100%, 50%, 0.4); padding-top: 0px; ***REMOVED***
+.cube__face--back   ***REMOVED*** background: hsla(120, 100%, 50%, 0.4); ***REMOVED***
+.cube__face--left   ***REMOVED*** background: hsla(180, 100%, 50%, 0.4); padding-top: 0px; ***REMOVED***
+.cube__face--top    ***REMOVED*** background: hsla(240, 100%, 50%, 0.4); ***REMOVED***
+.cube__face--bottom ***REMOVED*** background: hsla(300, 100%, 50%, 0.4); ***REMOVED***
+
+.cube__face--front  ***REMOVED*** transform: rotateY(  0deg) translateZ(100px); ***REMOVED***
+.cube__face--right  ***REMOVED*** transform: rotateY( 90deg) translateZ(100px); ***REMOVED***
+.cube__face--back   ***REMOVED*** transform: rotateY(180deg) translateZ(100px); ***REMOVED***
+.cube__face--left   ***REMOVED*** transform: rotateY(-90deg) translateZ(100px); ***REMOVED***
+.cube__face--top    ***REMOVED*** transform: rotateX( 90deg) translateZ(100px); ***REMOVED***
+.cube__face--bottom ***REMOVED*** transform: rotateX(-90deg) translateZ(100px); ***REMOVED***
+
+.chat, #emma ***REMOVED***
+    width: 200px;
+    height: 200px;
+    object-fit: fill;
+***REMOVED***
+
+#bpm ***REMOVED***
+  color: white;
+  background-color: black;
+  padding: 10px;
+***REMOVED***
+
+label ***REMOVED*** margin-right: 10px; ***REMOVED***
