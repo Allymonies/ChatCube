@@ -11,6 +11,11 @@
   "author": "",
   "license": "MIT",
   "dependencies": ***REMOVED***
+    "@twurple/api": "^5.0.10",
+    "@twurple/auth": "^5.0.10",
+    "@twurple/chat": "^5.0.10",
+    "@twurple/eventsub": "^5.0.10",
+    "@twurple/eventsub-ngrok": "^5.0.10",
     "express": "^4.17.1",
     "express-ws": "^5.0.2",
     "twitch-auth": "^4.6.7",

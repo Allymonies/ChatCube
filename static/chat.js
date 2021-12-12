@@ -1,5 +1,37 @@
 var cube = document.querySelector('.cube');
 var currentClass = '';
+const updateRate = 10;
+const msBetweenRotations = 10 * 1000;
+const jumpDuration = .5 * 1000;
+const jumpHeight = .1 * 1000;
+const spinDuration = 1.5 * 1000;
+const numberOfSpins = 2;
+const alertDuration = 10 * 1000;
+const notificationSound = new Audio('notification.wav');
+const bufferSize = 22050*30;
+const windowSize = 10;
+const wsUrl = "ws://" + window.location.host + "/ws";
+const webSocket = new WebSocket(wsUrl);
+let spinDirection = true;
+let averageWindow = [];
+let vol = 0;
+let rollingBufferA = [];
+let rollingBufferB = [];
+let alertTime = 0;
+let alertActive = false;
+let cubeNod = 0;
+let cubeRot = 0;
+let bpm = 0;
+
+function escapeHTML (unsafe_str) ***REMOVED***
+    return unsafe_str
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/\"/g, '&quot;')
+      .replace(/\'/g, '&#39;')
+      .replace(/\//g, '&#x2F;')
+***REMOVED***
 
 function changeSide() ***REMOVED***
     var showClass = 'show-front';
@@ -9,12 +41,27 @@ function changeSide() ***REMOVED***
     cube.classList.add( showClass );
     currentClass = showClass;
 ***REMOVED***
+
+function setAlert(text) ***REMOVED***
+    const alertBoxes = document.getElementsByClassName("alertbox");
+    const alerts = document.getElementsByClassName("alert");
+    for (var i = 0; i < alertBoxes.length; i++) ***REMOVED***
+        alerts[i].innerHTML = escapeHTML(text);
+        if (text == "") ***REMOVED***
+            alertBoxes[i].classList.add("hidden");
+        ***REMOVED*** else ***REMOVED***
+            alertBoxes[i].classList.remove("hidden");
+        ***REMOVED***
+    ***REMOVED***
+    if (text != "") ***REMOVED***
+        alertTime = alertDuration;
+        alertActive = true;
+    ***REMOVED***
+***REMOVED***
+
+setAlert("");
 // set initial side
 changeSide();
-
-let cubeNod = 0;
-let cubeRot = 0;
-let bpm = 0;
 
 (function() ***REMOVED***
     var chats = document.getElementsByClassName('chat');
@@ -228,18 +275,10 @@ var initializeRecorder = function(stream) ***REMOVED***
 
     audioInput.connect(lowpass);
     lowpass.connect(highpass);
-    highpass.connect(context.destination);
 
     audioInput.connect(recorder);
     recorder.connect(context.destination);
 ***REMOVED***
-
-let averageWindow = [];
-let vol = 0;
-const windowSize = 5;
-let rollingBufferA = [];
-let rollingBufferB = [];
-const bufferSize = 22050*30;
 
 var recorderProcess = function(e) ***REMOVED***
     var floatData = e.inputBuffer.getChannelData(0);
@@ -247,16 +286,13 @@ var recorderProcess = function(e) ***REMOVED***
     if (rollingBufferA.length > bufferSize) ***REMOVED***
        rollingBufferA.splice(0, rollingBufferA.length - bufferSize);
     ***REMOVED***
-    /*rollingBufferB.push(...e.inputBuffer.getChannelData(1));
-    if (rollingBufferB.length > bufferSize) ***REMOVED***
-         rollingBufferB.splice(0, rollingBufferB.length - bufferSize);
-    ***REMOVED****/
+
     var peaks = getPeaks([rollingBufferA, rollingBufferA]);
     var groups = getIntervals(peaks);
     var top = groups.sort(function(intA, intB) ***REMOVED***
         return intB.count - intA.count;
     ***REMOVED***).splice(0, 5);
-    //console.log("Estimate BPM at " + Math.round(top[0].tempo));
+
     bpm = top[0].tempo;
     let max = 0;
     for (var i = 0; i < floatData.length; i++) ***REMOVED***
@@ -274,16 +310,6 @@ var recorderProcess = function(e) ***REMOVED***
     ***REMOVED***
     average /= averageWindow.length;
     vol = average * 30;
-
-    //console.log(max);
-    //cubeNod = average * 6;
-    //console.log(cubeNod);
-//    i = max*100;
-    //cube.style.transform = "translateZ(-100px) rotateY(" + cubeRot.toString() + "deg) rotateX(" + (Math.sin(cubeNod/2)*35).toString() + "deg)";
-    //var intData = convertAudio(resampler.resample(floatData));
-    /*if (socket.readyState == WebSocket.OPEN) ***REMOVED***
-        socket.send(intData.buffer);
-    ***REMOVED****/
 ***REMOVED***
 
 var convertAudio = function(buffer) ***REMOVED***
@@ -295,46 +321,77 @@ var convertAudio = function(buffer) ***REMOVED***
     return buf;
 ***REMOVED***
 
+function easeInOutCubic(x) ***REMOVED***
+    return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+***REMOVED***
+
 getAudioSource("Microphone (VB-Audio Virtual Cable)", initializeRecorder);
 
-const updateRate = 10;
 let jump = 0;
-let jumpCounter = 0;
+let spin = 0;
 setInterval(function() ***REMOVED***
-    cubeRot += 0.01;
+    cubeRot += (spinDirection ? 1 : -1) * (updateRate / msBetweenRotations) * (2 * Math.PI);
+    //cubeRot += 0.002;
+    if (spinDirection && cubeRot > (2 * Math.PI)) ***REMOVED***
+        cubeRot -= (2 * Math.PI);
+    ***REMOVED*** else if (!spinDirection && cubeRot < 0) ***REMOVED***
+        cubeRot += (2 * Math.PI);
+    ***REMOVED***
     const msBetweenBeats = (60000 / bpm);
     if (isFinite(msBetweenBeats)) ***REMOVED***
         const add = (updateRate / msBetweenBeats) * Math.PI; 
         cubeNod += add;
-        //console.log(msBetweenBeats, updateRate, add, cubeNod);
+        if (cubeNod > (2 * Math.PI)) ***REMOVED***
+            cubeNod -= (2 * Math.PI);
+        ***REMOVED***
     ***REMOVED***
-    let maxNod = vol * 70;
-    //cubeNod += (60000 / bpm) ((bpm / 60) / 100) * Math.PI;
-    //cubeRot += 0.1;
-    document.getElementById("bpm").innerHTML = Math.round(bpm).toString() +  ", " + Math.round(vol * 100).toString() + "%, " + jump.toString();
-    cube.style.transform = "translateY(" + ((-Math.cos(jump)+1)*-200).toString() + "px) translateZ(-100px) rotateY(" + cubeRot.toString() + "deg) rotateX(" + (Math.sin(cubeNod)*maxNod).toString() + "deg)";
-    //document.getElementsByClassName('cube__face--front')[0].innerHTML = Math.round(bpm);
+    let maxNod = (easeInOutCubic(Math.min(vol+.20,1)) * (1 + Math.log(Math.max(1, vol)))) * 0.2;
+
+    const nod = Math.sin(cubeNod)*maxNod;
+    const bpmString = Math.round(bpm).toString();
+    const nodString = Math.round(nod*100).toString();
+    const volString = Math.round(vol * 100).toString();
+    const jumpString = Math.round(jump*100).toString();
+
+    const nodX = nod * Math.cos(cubeRot);
+    const nodZ = nod * Math.sin(cubeRot);
+    const rot = cubeRot + spin;
+    document.getElementById("debug").innerHTML = bpmString + ", " + nodString + "%, " + volString + "%, " + jumpString.toString();
+    cube.style.transform = "translateY(" + ((Math.cos(Math.PI + jump)+1)*-(jumpHeight / 2)).toString() + "px) translateZ(-100px) rotateY(" + rot.toString() + "rad) rotateX(" + nodX.toString() + "rad) rotateZ(" + nodZ.toString() + "rad)";
 ***REMOVED***, updateRate)
 
 setInterval(function() ***REMOVED***
-    /*jumpCounter += 1;
-    if (jumpCounter > (5000/updateRate)) ***REMOVED***
-        jumpCounter = 0;
-        jump = Math.PI*2
-    ***REMOVED****/
+    if (alertActive) ***REMOVED***
+        alertTime -= updateRate;
+        if (alertTime <= 0) ***REMOVED***
+            alertActive = false;
+            alertTime = 0;
+            setAlert("");
+        ***REMOVED***
+    ***REMOVED***
     if (jump > 0) ***REMOVED***
-        jump -= 0.25;
+        jump -= (updateRate / jumpDuration) * (2 * Math.PI);
+    ***REMOVED***
+    if (spin > 0) ***REMOVED***
+        spin -= (updateRate / spinDuration) * ((numberOfSpins * 2) * Math.PI);
     ***REMOVED***
 ***REMOVED***, updateRate)
-
-const wsUrl = "ws://" + window.location.host + "/ws";
-const webSocket = new WebSocket(wsUrl);
 
 webSocket.onmessage = function (event) ***REMOVED***
     const msg = JSON.parse(event.data);
     if (msg.type == "message") ***REMOVED***
         jump = Math.PI*2;
+    ***REMOVED*** else if (msg.type == "follow") ***REMOVED***
+        spin = Math.PI * (numberOfSpins * 2);
+        setAlert(msg.displayName + " has followed!");
+        notificationSound.play();
+    ***REMOVED*** else if (msg.type == "command") ***REMOVED***
+        if (msg.command == "spin") ***REMOVED***
+            spin = Math.PI * (numberOfSpins * 2);
+        ***REMOVED*** else if (msg.command == "jump") ***REMOVED***
+            jump = Math.PI*2;
+        ***REMOVED*** else if (msg.command == "flip") ***REMOVED***
+            spinDirection = !spinDirection;
+        ***REMOVED***
     ***REMOVED***
 ***REMOVED***
-
-//radioGroup.addEventListener( 'change', changeSide );
