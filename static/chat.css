@@ -1,32 +1,32 @@
-* ***REMOVED*** box-sizing: border-box; ***REMOVED***
+* { box-sizing: border-box; }
 
-body ***REMOVED*** font-family: sans-serif; ***REMOVED***
+body { font-family: sans-serif; }
 
-.scene ***REMOVED***
+.scene {
   width: 200px;
   height: 200px;
   margin: 80px;
   perspective: 400px;
   text-align: center;
-***REMOVED***
+}
 
-.cube ***REMOVED***
+.cube {
   width: 200px;
   height: 200px;
   position: relative;
   transform-style: preserve-3d;
   transform: translateZ(-100px);
   transition: transform 0s;
-***REMOVED***
+}
 
-.cube.show-front  ***REMOVED*** transform: translateZ(-100px) rotateY(   0deg); ***REMOVED***
-.cube.show-right  ***REMOVED*** transform: translateZ(-100px) rotateY( -90deg); ***REMOVED***
-.cube.show-back   ***REMOVED*** transform: translateZ(-100px) rotateY(-180deg); ***REMOVED***
-.cube.show-left   ***REMOVED*** transform: translateZ(-100px) rotateY(  90deg); ***REMOVED***
-.cube.show-top    ***REMOVED*** transform: translateZ(-100px) rotateX( -90deg); ***REMOVED***
-.cube.show-bottom ***REMOVED*** transform: translateZ(-100px) rotateX(  90deg); ***REMOVED***
+.cube.show-front  { transform: translateZ(-100px) rotateY(   0deg); }
+.cube.show-right  { transform: translateZ(-100px) rotateY( -90deg); }
+.cube.show-back   { transform: translateZ(-100px) rotateY(-180deg); }
+.cube.show-left   { transform: translateZ(-100px) rotateY(  90deg); }
+.cube.show-top    { transform: translateZ(-100px) rotateX( -90deg); }
+.cube.show-bottom { transform: translateZ(-100px) rotateX(  90deg); }
 
-.cube__face ***REMOVED***
+.cube__face {
   position: absolute;
   width: 200px;
   height: 200px;
@@ -36,36 +36,36 @@ body ***REMOVED*** font-family: sans-serif; ***REMOVED***
   font-weight: bold;
   color: white;
   text-align: center;
-***REMOVED***
+}
 
-.cube__face--front  ***REMOVED*** background: hsla(  0, 100%, 50%, 0.4); ***REMOVED***
-.cube__face--right  ***REMOVED*** background: hsla( 60, 100%, 50%, 0.4); padding-top: 0px; ***REMOVED***
-.cube__face--back   ***REMOVED*** background: hsla(120, 100%, 50%, 0.4); ***REMOVED***
-.cube__face--left   ***REMOVED*** background: hsla(180, 100%, 50%, 0.4); padding-top: 0px; ***REMOVED***
-.cube__face--top    ***REMOVED*** background: hsla(240, 100%, 50%, 0.4); ***REMOVED***
-.cube__face--bottom ***REMOVED*** background: hsla(300, 100%, 50%, 0.4); ***REMOVED***
+.cube__face--front  { background: hsla(  0, 100%, 50%, 0.4); }
+.cube__face--right  { background: hsla( 60, 100%, 50%, 0.4); padding-top: 0px; }
+.cube__face--back   { background: hsla(120, 100%, 50%, 0.4); }
+.cube__face--left   { background: hsla(180, 100%, 50%, 0.4); padding-top: 0px; }
+.cube__face--top    { background: hsla(240, 100%, 50%, 0.4); }
+.cube__face--bottom { background: hsla(300, 100%, 50%, 0.4); }
 
-.cube__face--front  ***REMOVED*** transform: rotateY(  0deg) translateZ(100px); ***REMOVED***
-.cube__face--right  ***REMOVED*** transform: rotateY( 90deg) translateZ(100px); ***REMOVED***
-.cube__face--back   ***REMOVED*** transform: rotateY(180deg) translateZ(100px); ***REMOVED***
-.cube__face--left   ***REMOVED*** transform: rotateY(-90deg) translateZ(100px); ***REMOVED***
-.cube__face--top    ***REMOVED*** transform: rotateX( 90deg) translateZ(100px); ***REMOVED***
-.cube__face--bottom ***REMOVED*** transform: rotateX(-90deg) translateZ(100px); ***REMOVED***
+.cube__face--front  { transform: rotateY(  0deg) translateZ(100px); }
+.cube__face--right  { transform: rotateY( 90deg) translateZ(100px); }
+.cube__face--back   { transform: rotateY(180deg) translateZ(100px); }
+.cube__face--left   { transform: rotateY(-90deg) translateZ(100px); }
+.cube__face--top    { transform: rotateX( 90deg) translateZ(100px); }
+.cube__face--bottom { transform: rotateX(-90deg) translateZ(100px); }
 
-.chat, #emma ***REMOVED***
+.chat, #emma {
     width: 200px;
     min-height: 150px;
     height: 100%;
     object-fit: fill;
-***REMOVED***
+}
 
-.cube__face ***REMOVED***
+.cube__face {
   display: flex;
   flex-direction: column;
   justify-content: center;
-***REMOVED***
+}
 
-.alertbox ***REMOVED***
+.alertbox {
   flex: 1 1 auto;
   width: 200px;
   background-color: #18181B;
@@ -74,9 +74,9 @@ body ***REMOVED*** font-family: sans-serif; ***REMOVED***
   /*display: flex;
   align-items: center;
   justify-content: center;*/
-***REMOVED***
+}
 
-.alert ***REMOVED***
+.alert {
   color: #ffffff;
   font-weight: 600;
   /*flex: 1 1 auto;*/
@@ -85,19 +85,19 @@ body ***REMOVED*** font-family: sans-serif; ***REMOVED***
   width: 200px;
   overflow: hidden;
   word-wrap: break-word;
-***REMOVED***
+}
 
-.hidden ***REMOVED***
+.hidden {
   display: none;
   width: 0;
   height: 0;
-***REMOVED***
+}
 
-#debug ***REMOVED***
+#debug {
   color: white;
   background-color: black;
   padding: 10px;
   margin-top: 50px;
-***REMOVED***
+}
 
-label ***REMOVED*** margin-right: 10px; ***REMOVED***
+label { margin-right: 10px; }

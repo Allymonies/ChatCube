@@ -1,16 +1,16 @@
-***REMOVED***
+{
   "name": "chatcube",
   "version": "1.0.0",
   "description": "CHAT CUBE CHAT CUBE",
   "main": "server.js",
   "type": "module",
-  "scripts": ***REMOVED***
+  "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js"
-  ***REMOVED***,
+  },
   "author": "",
   "license": "MIT",
-  "dependencies": ***REMOVED***
+  "dependencies": {
     "@twurple/api": "^5.0.10",
     "@twurple/auth": "^5.0.10",
     "@twurple/chat": "^5.0.10",
@@ -20,5 +20,5 @@
     "express-ws": "^5.0.2",
     "twitch-auth": "^4.6.7",
     "twitch-chat-client": "^4.6.7"
-  ***REMOVED***
-***REMOVED***
+  }
+}
