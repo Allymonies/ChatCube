@@ -9,7 +9,7 @@ const numberOfSpins = 2;
 const alertDuration = 10 * 1000;
 const notificationSound = new Audio('notification.wav');
 const bufferSize = 22050*30;
-const windowSize = 10;
+const windowSize = 5;
 const wsUrl = "ws://" + window.location.host + "/ws";
 const webSocket = new WebSocket(wsUrl);
 let spinDirection = true;
@@ -308,7 +308,7 @@ var recorderProcess = function(e) {
       average += averageWindow[i];
     }
     average /= averageWindow.length;
-    vol = average * 30;
+    vol = average * 25;
 }
 
 var convertAudio = function(buffer) {
