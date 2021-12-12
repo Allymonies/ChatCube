@@ -105,6 +105,25 @@ const followSubscription = await listener.subscribeToChannelFollowEvents(userId,
     broadcast({"type": "follow", "user": e.userName, "displayName": name});
 });
 
+/*const subscriptionSubscription = await listener.subscribeToChannelSubscriptionEvents(userId, e => {
+    const name = e.userDisplayName ?? e.userName;
+    console.log(name, " subscribed!");
+    broadcast({"type": "subscribe", "user": e.userName, "displayName": name});
+});
+
+const cheerSubscription = await listener.subscribeToChannelCheerEvents(userId, e => {
+    const message = {"type": "cheer", "bits": e.bits}
+    if (e.isAnonymous) {
+        message["anonymous"] = true;
+    } else {
+        message["userName"] = e.userName;
+        const name = e.userDisplayName ?? e.userName;
+        message["diplayName"] = name;
+    }
+    console.log("Got cheer", message.bits, "from", message.anonymous ? "anonymous" : message.userName);
+    broadcast(message);
+});*/
+
 const channelUpdateSupscription = await listener.subscribeToChannelUpdateEvents(userId, e => {
     console.log("Got a channel update event");
     /*wsServer.clients.forEach(function (client) {

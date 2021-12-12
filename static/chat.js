@@ -85,16 +85,15 @@ changeSide();
 
             window.URL = window.URL || window.webkitURL;
 
-            navigator.getUserMedia({
+            navigator.mediaDevices.getUserMedia({
                 audio: false,
                 video: videoResolution
-            },
-            function(stream) {
+            }).then(function(stream) {
+                console.log("Got stream", stream);
                 callback(stream);
                 //video.srcObject = stream;
                 //video.src = window.URL.createObjectURL(stream);
-            },
-            function(err) {
+            }).catch(function(err) {
                 console.log("The following error occured: " + err.name);
             });
         });      
@@ -116,13 +115,15 @@ changeSide();
       }
     }
     getCamera(videoWidth, videoHeight, "OBS-Camera4", function (stream) {
-      emma.srcObject = stream;
+        emma.srcObject = stream;
     });
     
     getCamera(videoWidth, videoHeight, "OBS-Camera3", function (stream) {
-      for (let i = 0; i < chats.length; i++) {
-          chats[i].srcObject = stream;
-      }
+        for (let j = 0; j < chats.length; j++) {
+            console.log("Setting stream of", chats[j], "to", stream, chats.length);
+            chats[j].srcObject = stream;
+            //chats[j].src = URL.createObjectURL(stream);
+        }
     });
 
 })();
@@ -139,18 +140,15 @@ function getAudioSource(deviceLabel, callback) {
       }
 
       window.URL = window.URL || window.webkitURL;
-      console.log("Getting device", device)
-      navigator.getUserMedia({
+      navigator.mediaDevices.getUserMedia({
           audio: {
                 deviceId: device
           }
-      },
-      function(stream) {
+      }).then(function(stream) {
           callback(stream);
           //video.srcObject = stream;
           //video.src = window.URL.createObjectURL(stream);
-      },
-      function(err) {
+      }).catch(function(err) {
           console.log("The following error occured: " + err.name);
       });
   });      
@@ -256,7 +254,7 @@ function getIntervals(peaks) {
 var initializeRecorder = function(stream) {
     var audioContext = window.AudioContext;
     var context = new audioContext();
-    var bufferSize = 512;
+    var bufferSize = 2048;
     //resampler = new Resampler(context.sampleRate, 16000);
     var audioInput = context.createMediaStreamSource(stream);
     var recorder = context.createScriptProcessor(bufferSize, 1, 1);
@@ -292,6 +290,7 @@ var recorderProcess = function(e) {
     var top = groups.sort(function(intA, intB) {
         return intB.count - intA.count;
     }).splice(0, 5);
+    if (top.length == 0) return;
 
     bpm = top[0].tempo;
     let max = 0;
@@ -381,9 +380,20 @@ webSocket.onmessage = function (event) {
     const msg = JSON.parse(event.data);
     if (msg.type == "message") {
         jump = Math.PI*2;
-    } else if (msg.type == "follow") {
+    } else if (msg.type == "follow" || msg.type == "subscribe") {
         spin = Math.PI * (numberOfSpins * 2);
-        setAlert(msg.displayName + " has followed!");
+        if (msg.type == "follow") {
+            setAlert(msg.displayName + " has followed!");
+        } else {
+            setAlert(msg.displayName + " has subscribed!");
+        }
+        notificationSound.play();
+    } else if (msg.type == "cheer") {
+        if (!msg.anonymous) {
+            setAlert(msg.displayName + " cheered " + msg.bits.toString() + " bits!");
+        } else {
+            setAlert("Someone cheered " + msg.bits.toString() + " bits!");
+        }
         notificationSound.play();
     } else if (msg.type == "command") {
         if (msg.command == "spin") {
