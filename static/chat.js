@@ -383,7 +383,7 @@ webSocket.onmessage = function (event) {
     } else if (msg.type == "follow" || msg.type == "subscribe") {
         spin = Math.PI * (numberOfSpins * 2);
         if (msg.type == "follow") {
-            setAlert(msg.displayName + " has followed!");
+            setAlert(msg.displayName + " has followed! <3");
         } else {
             setAlert(msg.displayName + " has subscribed!");
         }

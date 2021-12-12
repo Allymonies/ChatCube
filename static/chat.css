@@ -70,6 +70,7 @@ body { font-family: sans-serif; }
   width: 200px;
   background-color: #18181B;
   border: 1px solid #aaaaaa;
+  padding: 2px;
   border-radius: 5px;
   /*display: flex;
   align-items: center;
@@ -77,7 +78,7 @@ body { font-family: sans-serif; }
 }
 
 .alert {
-  color: #ffffff;
+  color: #ff8787;
   font-weight: 600;
   /*flex: 1 1 auto;*/
   font-size: 16px;
