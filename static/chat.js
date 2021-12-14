@@ -7,6 +7,12 @@ const jumpHeight = .1 * 1000;
 const spinDuration = 1.5 * 1000;
 const numberOfSpins = 2;
 const alertDuration = 10 * 1000;
+const partyWidth = 200;
+const partyTravel = 1 * 1000;
+const partyHeight = 50;
+const partyJump = .5 * 1000;
+const partySpinFactor = 4;
+const partyNodFactor = 2;
 const notificationSound = new Audio('notification.wav');
 const bufferSize = 22050*30;
 const windowSize = 5;
@@ -22,6 +28,12 @@ let alertActive = false;
 let cubeNod = 0;
 let cubeRot = 0;
 let bpm = 0;
+let partyDuration = 0;
+let jump = 0;
+let spin = 0;
+let party = 0;
+let x = 0;
+let y = 0;
 
 function escapeHTML (unsafe_str) {
     return unsafe_str
@@ -326,10 +338,8 @@ function easeInOutCubic(x) {
 
 getAudioSource("Microphone (VB-Audio Virtual Cable)", initializeRecorder);
 
-let jump = 0;
-let spin = 0;
 setInterval(function() {
-    cubeRot += (spinDirection ? 1 : -1) * (updateRate / msBetweenRotations) * (2 * Math.PI);
+    cubeRot += (spinDirection ? 1 : -1) * (party > 0 ? partySpinFactor : 1) * (updateRate / msBetweenRotations) * (2 * Math.PI);
     //cubeRot += 0.002;
     if (spinDirection && cubeRot > (2 * Math.PI)) {
         cubeRot -= (2 * Math.PI);
@@ -346,17 +356,22 @@ setInterval(function() {
     }
     let maxNod = (easeInOutCubic(Math.min(vol+.20,1)) * (1 + Math.log(Math.max(1, vol)))) * 0.2;
 
-    const nod = Math.sin(cubeNod)*maxNod;
+    const nod = Math.sin(cubeNod)*maxNod*(party > 0 ? partyNodFactor : 1);
     const bpmString = Math.round(bpm).toString();
     const nodString = Math.round(nod*100).toString();
     const volString = Math.round(vol * 100).toString();
     const jumpString = Math.round(jump*100).toString();
 
+    y = (Math.cos(Math.PI + jump)+1)*-(jumpHeight / 2)
+    y += (Math.sin( (party / partyJump) * 2 * Math.PI) * partyHeight);
+    x = (Math.cos( ((party / partyTravel) * 2 * Math.PI) - Math.PI) * (partyWidth / 2)) + (partyWidth / 2);
+
     const nodX = nod * Math.cos(cubeRot);
     const nodZ = nod * Math.sin(cubeRot);
     const rot = cubeRot + spin;
-    document.getElementById("debug").innerHTML = bpmString + ", " + nodString + "%, " + volString + "%, " + jumpString.toString();
-    cube.style.transform = "translateY(" + ((Math.cos(Math.PI + jump)+1)*-(jumpHeight / 2)).toString() + "px) translateZ(-100px) rotateY(" + rot.toString() + "rad) rotateX(" + nodX.toString() + "rad) rotateZ(" + nodZ.toString() + "rad)";
+    document.getElementById("debug").innerHTML = bpmString + ", " + nodString + "%, " + volString + "%, " + jumpString.toString() + 
+    ", " + ((partyDuration - party) / 1000).toString() + "s";
+    cube.style.transform = "translateY(" + y.toString() + "px) translateX(" + x.toString() + "px) translateZ(-100px) rotateY(" + rot.toString() + "rad) rotateX(" + nodX.toString() + "rad) rotateZ(" + nodZ.toString() + "rad)";
 }, updateRate)
 
 setInterval(function() {
@@ -373,6 +388,13 @@ setInterval(function() {
     }
     if (spin > 0) {
         spin -= (updateRate / spinDuration) * ((numberOfSpins * 2) * Math.PI);
+    }
+    if (partyDuration > 0) {
+        party += updateRate;
+        if (party >= partyDuration) {
+            party = 0;
+            partyDuration = 0;
+        }
     }
 }, updateRate)
 
@@ -402,6 +424,8 @@ webSocket.onmessage = function (event) {
             jump = Math.PI*2;
         } else if (msg.command == "flip") {
             spinDirection = !spinDirection;
+        } else if (msg.command == "party") {
+            partyDuration += msg.duration * 1000;
         }
     }
 }

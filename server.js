@@ -12,7 +12,8 @@ var app = express();
 const expressWs = express_ws(app);
 
 let config = JSON.parse(await fs.readFile("./config.json"));
-const admins = ["allymonies", "1lann", "synhayden"]
+const admins = ["allymonies", "1lann", "synhayden", "samjk"]
+const defaultPartyDuration = 30;
 
 const clientId = config.clientId;
 const accessToken = config.accessToken;
@@ -70,19 +71,39 @@ function broadcast(payload) {
     });
 }
 
+function checkPermissions(command, user) {
+    if (command == 'jump') {
+        return true;
+    } else if (admins.includes(user.toLowerCase())) {
+        return true;
+    }
+}
+
 const chatListener = chatClient.onMessage(async (channel, user, message, msg) => {
     console.log("Got message", message, "from", user);
     if (message[0] == '!') {
-        const command = message.substr(1).split(' ');
-        console.log("Got command", command);
-        if (command[0] == 'jump') {
+        const args = message.substr(1).split(' ');
+        const command = args.shift().toLowerCase();
+        console.log("Got command", command, args);
+        if (!checkPermissions(command, user)) {
+            // Do nothing, no permissions;
+            console.log(user, "doesn't have permissions to run", command);
+            return;
+        }
+        if (command == 'jump') {
             broadcast({"type": "command", "command": "jump"});
-        } else if (command[0] == 'spin' && admins.includes(user.toLowerCase())) {
+        } else if (command == 'spin') {
             broadcast({"type": "command", "command": "spin"});
-        } else if (command[0] == 'testfollow' && command.length > 1 && admins.includes(user.toLowerCase())) {
-            broadcast({"type": "follow", "user": command[1], "displayName": command[1]});
-        } else if (command[0] == 'flip' && admins.includes(user.toLowerCase())) {
+        } else if (command == 'testfollow' && args.length > 0) {
+            broadcast({"type": "follow", "user": args[0], "displayName": args[0]});
+        } else if (command == 'flip') {
             broadcast({"type": "command", "command": "flip"});
+        } else if (command == 'party') {
+            const duration = args.length > 0 ? parseInt(args[0]) : defaultPartyDuration;
+            console.log("running a party of length", duration);
+            if (duration > 0) {
+                broadcast({"type": "command", "command": "party", "duration": duration});
+            }
         }
     } else {
         broadcast({"type": "message", "user": user, "message": message});
