@@ -13,6 +13,8 @@ const partyHeight = 50;
 const partyJump = .5 * 1000;
 const partySpinFactor = 4;
 const partyNodFactor = 2;
+const maxConfigSpinFactor = 2;
+const maxConfigNodFactor = 2;
 const notificationSound = new Audio('notification.wav');
 const bufferSize = 22050*30;
 const windowSize = 5;
@@ -34,6 +36,8 @@ let spin = 0;
 let party = 0;
 let x = 0;
 let y = 0;
+let spinFactor = 1;
+let nodFactor = 1;
 
 function escapeHTML (unsafe_str) {
     return unsafe_str
@@ -68,6 +72,44 @@ function setAlert(text) {
     if (text != "") {
         alertTime = alertDuration;
         alertActive = true;
+    }
+}
+
+const messages = [];
+const maxMessages = 10;
+function addMessage(message) {
+    // broadcast({"type": "message", "user": user, "message": message, "color": msg.userInfo.color});
+    if (messages.length >= maxMessages) {
+        messages.shift();
+    }
+    messages.push(message);
+    const chatboxes = document.getElementsByClassName("chatbox-inner");
+    for (var i = 0; i < chatboxes.length; i++) {
+        const chatbox = chatboxes[i];
+        // remove all children
+        while (chatbox.firstChild) {
+            chatbox.removeChild(chatbox.firstChild);
+        }
+        for (var j = 0; j < messages.length; j++) {
+            const msg = messages[j];
+            const chat = document.createElement("div");
+            chat.classList.add("chat-message");
+            const user = document.createElement("span");
+            user.classList.add("user");
+            user.style.color = msg.color || "#ff8989";
+            user.innerHTML = escapeHTML(msg.user);
+            const messageSeparator = document.createElement("span");
+            messageSeparator.innerHTML = ": ";
+            messageSeparator.classList.add("user-separator");
+            const messageElement = document.createElement("span");
+            messageElement.classList.add("message");
+            messageElement.innerHTML = escapeHTML(msg.message);
+            chat.appendChild(user);
+            chat.appendChild(messageSeparator);
+            chat.appendChild(messageElement);
+            chatbox.appendChild(chat);
+            chat.scrollIntoView();
+        }
     }
 }
 
@@ -130,7 +172,7 @@ changeSide();
         emma.srcObject = stream;
     });
     
-    getCamera(videoWidth, videoHeight, "OBS-Camera3", function (stream) {
+    getCamera(videoWidth, videoHeight, "OBS Virtual Camera", function (stream) {
         for (let j = 0; j < chats.length; j++) {
             console.log("Setting stream of", chats[j], "to", stream, chats.length);
             chats[j].srcObject = stream;
@@ -339,7 +381,7 @@ function easeInOutCubic(x) {
 getAudioSource("Microphone (VB-Audio Virtual Cable)", initializeRecorder);
 
 setInterval(function() {
-    cubeRot += (spinDirection ? 1 : -1) * (party > 0 ? partySpinFactor : 1) * (updateRate / msBetweenRotations) * (2 * Math.PI);
+    cubeRot += (spinDirection ? 1 : -1) * (party > 0 ? partySpinFactor : 1) * spinFactor * (updateRate / msBetweenRotations) * (2 * Math.PI);
     //cubeRot += 0.002;
     if (spinDirection && cubeRot > (2 * Math.PI)) {
         cubeRot -= (2 * Math.PI);
@@ -356,7 +398,7 @@ setInterval(function() {
     }
     let maxNod = (easeInOutCubic(Math.min(vol+.20,1)) * (1 + Math.log(Math.max(1, vol)))) * 0.2;
 
-    const nod = Math.sin(cubeNod)*maxNod*(party > 0 ? partyNodFactor : 1);
+    const nod = Math.sin(cubeNod)*maxNod*(party > 0 ? partyNodFactor : 1)*nodFactor;
     const bpmString = Math.round(bpm).toString();
     const nodString = Math.round(nod*100).toString();
     const volString = Math.round(vol * 100).toString();
@@ -402,6 +444,7 @@ webSocket.onmessage = function (event) {
     const msg = JSON.parse(event.data);
     if (msg.type == "message") {
         jump = Math.PI*2;
+        addMessage(msg);
     } else if (msg.type == "follow" || msg.type == "subscribe") {
         spin = Math.PI * (numberOfSpins * 2);
         if (msg.type == "follow") {
@@ -427,5 +470,8 @@ webSocket.onmessage = function (event) {
         } else if (msg.command == "party") {
             partyDuration += msg.duration * 1000;
         }
+    } else if (msg.type == "config") {
+        spinFactor = msg.spin * maxConfigSpinFactor;
+        nodFactor = msg.nod * maxConfigNodFactor;
     }
 }

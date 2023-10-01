@@ -57,6 +57,7 @@ body { font-family: sans-serif; }
     min-height: 150px;
     height: 100%;
     object-fit: fill;
+    display: none;
 }
 
 .cube__face {
@@ -72,9 +73,57 @@ body { font-family: sans-serif; }
   border: 1px solid #aaaaaa;
   padding: 2px;
   border-radius: 5px;
+  max-height: 30px;
   /*display: flex;
   align-items: center;
   justify-content: center;*/
+}
+
+.chatbox-container {
+  overflow: hidden
+}
+
+.chatbox {
+  flex: 1 1 auto;
+  width: 200px;
+  background-color: #18181B;
+  border: 1px solid #aaaaaa;
+  padding: 2px;
+  border-radius: 5px;
+  align-items: left;
+  overflow: hidden;
+  /*display: flex;
+  align-items: center;
+  justify-content: center;*/
+}
+
+/* .chatbox-inner {
+} */
+
+.chat-message {
+  width: 100%;
+  text-align: left;
+  display: block;
+  line-height: 0.3em;
+  word-wrap: anywhere;
+}
+
+.message {
+  font-size: 16px;
+  font-weight: 200;
+}
+
+.user {
+  font-size: 16px;
+  font-weight: 600;
+  word-wrap: unset;
+}
+
+.user-separator {
+  font-size: 16px;
+  font-weight: 400;
+  color: #aaa;
+  padding-right: 4px;
 }
 
 .alert {

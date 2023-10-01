@@ -1,28 +1,39 @@
 //var cors = require('cors')
 import { ApiClient } from '@twurple/api';
-import { RefreshingAuthProvider , StaticAuthProvider, ClientCredentialsAuthProvider } from '@twurple/auth';
-import { NgrokAdapter } from '@twurple/eventsub-ngrok';
+import { AppTokenAuthProvider, RefreshingAuthProvider } from '@twurple/auth';
+// import { NgrokAdapter } from '@twurple/eventsub-ngrok';
 import { ChatClient } from '@twurple/chat';
 import { DirectConnectionAdapter, EventSubListener } from '@twurple/eventsub';
+import { EventSubWsListener } from '@twurple/eventsub-ws';
 import {promises as fs} from 'fs';
 import express from 'express';
 import express_ws from 'express-ws';
+import serialport from 'serialport';
 var app = express();
 //import config from './config.js';
 const expressWs = express_ws(app);
 
+const serialPort = new serialport('\\\\.\\COM10', {
+  baudRate: 9600,
+  autoOpen: false
+});
+
 let config = JSON.parse(await fs.readFile("./config.json"));
 const admins = ["allymonies", "1lann", "synhayden", "samjk"]
 const defaultPartyDuration = 30;
+const sliderUpdateRate = 50;
+const sliderMax = 1023;
 
 const clientId = config.clientId;
-const accessToken = config.accessToken;
+const accessToken = config.token.accessToken;
+const refreshToken = config.token.refreshToken;
 const clientSecret = config.clientSecret;
 console.log("Getting chat auth provider");
 const chatAuthProvider = new RefreshingAuthProvider(
     {
 		clientId,
 		clientSecret,
+        refreshToken,
 		onRefresh: async newTokenData => {
             config.token = newTokenData;
             await fs.writeFile('./config.json', JSON.stringify(config, null, 4), 'UTF-8');
@@ -30,8 +41,15 @@ const chatAuthProvider = new RefreshingAuthProvider(
 	},
 	config.token
 );
+//const chatAuthProvider = new AppTokenAuthProvider(clientId, clientSecret);
+
+await chatAuthProvider.addUserForToken({
+	accessToken,
+	refreshToken
+}, ['chat']);
+
 console.log("Getting app token auth provider");
-const authProvider = new ClientCredentialsAuthProvider(clientId, clientSecret);
+const authProvider = new AppTokenAuthProvider(clientId, clientSecret);
 const apiClient = new ApiClient({ authProvider });
 console.log("Getting user id");
 const userId = (await apiClient.users.getUserByName('allymonies')).id;
@@ -106,21 +124,22 @@ const chatListener = chatClient.onMessage(async (channel, user, message, msg) =>
             }
         }
     } else {
-        broadcast({"type": "message", "user": user, "message": message});
+        broadcast({"type": "message", "user": user, "message": message, "color": msg.userInfo.color});
     }
 });
 
 apiClient.eventSub.deleteAllSubscriptions()
-const listener = new EventSubListener({
-    apiClient,
-    adapter: new NgrokAdapter(),
-    secret: config.eventSubSecret
-});
+// const listener = new EventSubListener({
+//     apiClient,
+//     adapter: new NgrokAdapter(),
+//     secret: config.eventSubSecret
+// });
+const listener = new EventSubWsListener({ apiClient });
 console.log("Starting event listener");
-await listener.listen();
+listener.start();
 
 console.log("Creating subscriptions");
-const followSubscription = await listener.subscribeToChannelFollowEvents(userId, e => {
+const followSubscription = listener.on(userId, undefined, (e) => {
     const name = e.userDisplayName ?? e.userName;
     console.log(name, " followed!");
     broadcast({"type": "follow", "user": e.userName, "displayName": name});
@@ -145,12 +164,39 @@ const cheerSubscription = await listener.subscribeToChannelCheerEvents(userId, e
     broadcast(message);
 });*/
 
-const channelUpdateSupscription = await listener.subscribeToChannelUpdateEvents(userId, e => {
-    console.log("Got a channel update event");
-    /*wsServer.clients.forEach(function (client) {
-        client.send(JSON.stringify({"type": "follow"}));
-    });*/
-});
+// const channelUpdateSupscription = listener.onChannelUpdate(userId, e => {
+//     console.log("Got a channel update event");
+//     /*wsServer.clients.forEach(function (client) {
+//         client.send(JSON.stringify({"type": "follow"}));
+//     });*/
+// });
+
+serialPort.on("open", event => {
+    let messageState = "";
+    let last = 0;
+    serialPort.on("data", data => {
+        messageState += data.toString();
+        const lines = messageState.split("\r\n")
+        if (lines.length > 1) {
+            const completeEntry = lines[lines.length - 2];
+            messageState = lines[lines.length - 1];
+            const values = completeEntry.split("|");
+            if (values.length == 5) {
+                const spin = parseInt(values[4]);
+                const nod = parseInt(values[3]);
+                const now = Date.now();
+                if (now > last + sliderUpdateRate) {
+                    broadcast({
+                        "type": "config",
+                        "spin": 1-(spin / sliderMax),
+                        "nod": 1-(nod / sliderMax)
+                    });
+                }
+            }
+        }
+    });
+})
+serialPort.open();
 
 var server = app.listen(port, host, function () {
     var host = server.address().address

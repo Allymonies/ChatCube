@@ -11,13 +11,15 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "@twurple/api": "^5.0.10",
-    "@twurple/auth": "^5.0.10",
-    "@twurple/chat": "^5.0.10",
-    "@twurple/eventsub": "^5.0.10",
-    "@twurple/eventsub-ngrok": "^5.0.10",
+    "@twurple/api": "^7.0.2",
+    "@twurple/auth": "^7.0.2",
+    "@twurple/chat": "^7.0.2",
+    "@twurple/eventsub": "^5.3.4",
+    "@twurple/eventsub-ws": "^7.0.2",
     "express": "^4.17.1",
     "express-ws": "^5.0.2",
+    "serialport": "^9.2.8",
+    "twitch": "^4.4.0",
     "twitch-auth": "^4.6.7",
     "twitch-chat-client": "^4.6.7"
   }
